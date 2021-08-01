@@ -38,6 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
             this._changeActivePhoto = this._changeActivePhoto.bind(this);
             this._saveImg = this._saveImg.bind(this);
             this._initCanvas = this._initCanvas.bind(this);
+            this._fullscreenChange = this._fullscreenChange.bind(this);
+            this._fullscreenEnter = this._fullscreenEnter.bind(this);
+            this._fullscreenExit = this._fullscreenExit.bind(this);
+            this._exitFullscreen = this._exitFullscreen.bind(this);
         }
 
         // init app
@@ -86,33 +90,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // listener for btn full screen
         _listenerFullScreenBtn() {
-            this.fullScreenBtn.addEventListener('click', (e) => {
-                const fullscreenElement = document.fullscreenElement
-                                        || document.mozFullscreenElement
-                                        || document.webkitFullscreenElement;
+            this.fullScreenBtn.addEventListener('click', this._fullscreenChange);
 
-                const fullscreenEnabled = document.fullscreenEnabled
-                                        || document.mozFullscreenEnabled
-                                        || document.webkitFullscreenEnabled;
-
-                if (fullscreenElement === null) {
-
-                    if(document.body.requestFullScreen) document.body.requestFullScreen();
-                    else if (document.body.mozRequestFullScreen) document.body.mozRequestFullScreen();
-                    else if (document.body.webkitRequestFullScreen) document.body.webkitRequestFullScreen();
-
-                    e.target.classList.add('active__rull__screen');
-
-                } else {
-
-                    if(document.cancelFullScreen) document.cancelFullScreen();
-                    else if(document.mozCancelFullScreen) document.mozCancelFullScreen();
-                    else if (document.webkitCancelFullScreen) document.webkitCancelFullScreen();
-
-                    e.target.classList.remove('active__rull__screen');
-
-                }
-            });
+            document.addEventListener('webkitfullscreenchange', this._exitFullscreen);
+            document.addEventListener('mozfullscreenchange', this._exitFullscreen);
+            document.addEventListener('MSFullscreenChange', this._exitFullscreen);
+            document.addEventListener('fullscreenchange', this._exitFullscreen);
         }
 
         // listener for input type=file
@@ -212,6 +195,42 @@ document.addEventListener('DOMContentLoaded', () => {
             const canvas = document.createElement('canvas');
             canvas.style.display = 'none';
             document.body.append(canvas);
+        }
+
+        // change fullscreen page
+        _fullscreenChange() {
+            const fullscreenElement = document.fullscreenElement
+                || document.mozFullscreenElement
+                || document.webkitFullscreenElement;
+
+            fullscreenElement === null
+                ? this._fullscreenEnter()
+                : this._fullscreenExit();
+        }
+
+        // for esc btn
+        _exitFullscreen() {
+            if (!document.fullscreenElement && !document.webkitIsFullScreen && !document.mozFullScreen && !document.mozFullscreenElement) {
+                this._fullscreenExit();
+            }
+        }
+
+        // enter in fullscreen
+        _fullscreenEnter() {
+            if (document.body.requestFullScreen) document.body.requestFullScreen();
+            else if (document.body.mozRequestFullScreen) document.body.mozRequestFullScreen();
+            else if (document.body.webkitRequestFullScreen) document.body.webkitRequestFullScreen();
+
+            this.fullScreenBtn.classList.add('active__rull__screen');
+        }
+
+        // exit from fullscreen
+        _fullscreenExit() {
+            if (document.cancelFullScreen) document.cancelFullScreen();
+            else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+            else if (document.webkitCancelFullScreen) document.webkitCancelFullScreen();
+
+            this.fullScreenBtn.classList.remove('active__rull__screen');
         }
     }
 
