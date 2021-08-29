@@ -87,8 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
             this._fullscreenEnter = this._fullscreenEnter.bind(this);
             this._fullscreenExit = this._fullscreenExit.bind(this);
             this._exitFullscreen = this._exitFullscreen.bind(this);
-
-            this._logInfoTask = this._logInfoTask.bind(this);
         }
 
         // init app
@@ -107,8 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
             this._listenerFileLoad();
             this._listenerThumbnailsBlock();
             this._initCanvas();
-
-            this._logInfoTask();
         }
 
         // listener for inputs type=range
@@ -311,18 +307,6 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (document.webkitCancelFullScreen) document.webkitCancelFullScreen();
 
             this.fullScreenBtn.classList.remove('active__rull__screen');
-        }
-
-        // log information about task
-        _logInfoTask() {
-            console.log('Первый этап. Повторить исходный проект - ', 10);
-            console.log('Второй этап. Добавьте в приложение минимум два дополнительных фильтра и пресеты - фото, к которым применён наборы фильтров. При выборе миниатюры пресета такие же фильтры применяются к основному фото - ', 10);
-            console.log('Третий этап. Дополнительный фукционал на выбор - ', 40);
-            console.log(' - Перелистывание фото - ', 10);
-            console.log(' - загрузка в приложение фото с компьютера - ', 10);
-            console.log(' - сохранение фото на компьютер вместе с наложенными фильтрами - ', 10);
-            console.log(' - сброс фильтров кликом на кнопку - ', 10);
-            console.log('Общий балл - ', 30, '/', 30);
         }
     }
 
