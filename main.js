@@ -3,18 +3,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
     class Photogilter {
         constructor(optionsPgotofilter) {
-            this.initialState = {
-                'blur_value': 0,
-                'invert_value': 0,
-                'sepia_value': 0,
-                'saturate_value': 100,
-                'hue_value': 0,
+            this.filterStates = {
+                original: {
+                    'blur_value': 0,
+                    'invert_value': 0,
+                    'sepia_value': 0,
+                    'saturate_value': 100,
+                    'hue_value': 0,
+                    'contrast': 100,
+                    'grayscale': 0,
+                },
+                black__white: {
+                    'blur_value': 0,
+                    'invert_value': 0,
+                    'sepia_value': 0,
+                    'saturate_value': 100,
+                    'hue_value': 0,
+                    'contrast': 100,
+                    'grayscale': 100,
+                },
+                blur__el: {
+                    'blur_value': 8,
+                    'invert_value': 0,
+                    'sepia_value': 0,
+                    'saturate_value': 100,
+                    'hue_value': 0,
+                    'contrast': 150,
+                    'grayscale': 0,
+                },
+                nebula: {
+                    'blur_value': 0,
+                    'invert_value': 20,
+                    'sepia_value': 0,
+                    'saturate_value': 100,
+                    'hue_value': 0,
+                    'contrast': 80,
+                    'grayscale': 0,
+                },
+                excited: {
+                    'blur_value': 0,
+                    'invert_value': 0,
+                    'sepia_value': 0,
+                    'saturate_value': 200,
+                    'hue_value': 0,
+                    'contrast': 140,
+                    'grayscale': 0,
+                },
+
             };
 
             // main blocks
             this.inputsParent = document.querySelector(optionsPgotofilter.inputsBlock || '.controls__block');
             this.photosblock = document.querySelector(optionsPgotofilter.photosBlock || '.photos__block');
             this.fullScreenBtn = document.getElementById('full__screen');
+            this.acivePhotoIndex = 0;
 
             // aditionals variables
             this.btnsParent = this.photosblock.querySelector('.photos__btns');
@@ -30,31 +72,43 @@ document.addEventListener('DOMContentLoaded', () => {
             this._listenerClickBtns = this._listenerClickBtns.bind(this);
             this._listenerFullScreenBtn = this._listenerFullScreenBtn.bind(this);
             this._listenerFileLoad = this._listenerFileLoad.bind(this);
+            this._listenerThumbnailsBlock = this._listenerThumbnailsBlock.bind(this);
 
             this._changeOutPutNumberAndFilterVar = this._changeOutPutNumberAndFilterVar.bind(this);
             this._clearFilter = this._clearFilter.bind(this);
 
-            this._loadImg = this._loadImg.bind(this);
             this._changeActivePhoto = this._changeActivePhoto.bind(this);
+            this._loadImg = this._loadImg.bind(this);
             this._saveImg = this._saveImg.bind(this);
             this._initCanvas = this._initCanvas.bind(this);
+            this._changePhotoThumbnails = this._changePhotoThumbnails.bind(this);
+
             this._fullscreenChange = this._fullscreenChange.bind(this);
             this._fullscreenEnter = this._fullscreenEnter.bind(this);
             this._fullscreenExit = this._fullscreenExit.bind(this);
             this._exitFullscreen = this._exitFullscreen.bind(this);
+
+            this._logInfoTask = this._logInfoTask.bind(this);
         }
 
         // init app
         init() {
+            this.photosParent.querySelectorAll('.photo__item')[this.acivePhotoIndex].classList.add('active__photo');
+
             this.inputsParent.querySelectorAll('input[type="range"]').forEach(inputEl => {
                 this._changeOutPutNumberAndFilterVar(inputEl);
             });
+
+            this._changePhotoThumbnails();
 
             this._listenerChangeInputs();
             this._listenerClickBtns();
             this._listenerFullScreenBtn();
             this._listenerFileLoad();
+            this._listenerThumbnailsBlock();
             this._initCanvas();
+
+            this._logInfoTask();
         }
 
         // listener for inputs type=range
@@ -103,6 +157,21 @@ document.addEventListener('DOMContentLoaded', () => {
             this.fileInput.addEventListener('change', (e) => this._loadImg(e));
         }
 
+        // listener for thumbnails btns
+        _listenerThumbnailsBlock() {
+            const thumbnailBlock = this.photosblock.querySelector('.photo__thumbnails');
+
+            thumbnailBlock.addEventListener('click', (e) => {
+                const btn = e.target.closest('.thumbnails__item');
+                if (btn) {
+                    this.inputsParent.querySelectorAll('input[type="range"]').forEach(inputEl => {
+                        inputEl.value = this.filterStates[btn.dataset.varietn][inputEl.name];
+                        this._changeOutPutNumberAndFilterVar(inputEl);
+                    });
+                }
+            });
+        }
+
         // change viev on change input
         _changeOutPutNumberAndFilterVar(inputEl) {
             let inputOutputNumber = inputEl.parentElement.nextElementSibling;
@@ -114,10 +183,21 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.style.setProperty('--' + inputEl.name, currentValue + inputEl.dataset.var);
         }
 
+        // change background in thumbnails photos
+        _changePhotoThumbnails() {
+            let photosActiveSrc = this.photosParent.querySelectorAll('.photo__item')[this.acivePhotoIndex].querySelector('img').getAttribute('src');
+            let thumbnail__photos = this.photosblock.querySelectorAll('.photo__thumbnails .item__photo');
+
+            thumbnail__photos.forEach((el) => {
+                el.style.background = `url(${photosActiveSrc}) no-repeat center center`;
+                el.style.backgroundSize = 'cover';
+            });
+        }
+
         // clear custom filter options
         _clearFilter() {
             this.inputsParent.querySelectorAll('input[type="range"]').forEach(inputEl => {
-                inputEl.value = this.initialState[inputEl.name];
+                inputEl.value = this.filterStates.original[inputEl.name];
                 this._changeOutPutNumberAndFilterVar(inputEl);
             });
         }
@@ -136,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 wrapImg.classList.add('photo__item');
                 wrapImg.append(img);
                 this.photosParent.append(wrapImg);
-                this._changeActivePhoto('last')
+                this._changeActivePhoto('last');
             }
 
             reader.readAsDataURL(file);
@@ -145,19 +225,19 @@ document.addEventListener('DOMContentLoaded', () => {
          // change active photo for view
         _changeActivePhoto(number='next') {
             let photos = this.photosParent.querySelectorAll('.photo__item');
-            let aciveIndex = 0;
 
             photos.forEach((el, ind) => {
                 if (el.classList.contains('active__photo')) {
-                    aciveIndex = ind + 1;
+                    this.acivePhotoIndex = ind + 1;
                 }
                 el.classList.remove('active__photo');
             });
 
-            if (aciveIndex >= photos.length ) aciveIndex = 0;
+            if (this.acivePhotoIndex >= photos.length ) this.acivePhotoIndex = 0;
+            if (number === 'last') this.acivePhotoIndex = photos.length - 1;
 
-            if (number === 'next') photos[aciveIndex].classList.add('active__photo');
-            else if (number === 'last') photos[photos.length - 1].classList.add('active__photo');
+            photos[this.acivePhotoIndex].classList.add('active__photo');
+            this._changePhotoThumbnails();
         }
 
         // save photo with filter options
@@ -231,6 +311,18 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (document.webkitCancelFullScreen) document.webkitCancelFullScreen();
 
             this.fullScreenBtn.classList.remove('active__rull__screen');
+        }
+
+        // log information about task
+        _logInfoTask() {
+            console.log('Первый этап. Повторить исходный проект - ', 10);
+            console.log('Второй этап. Добавьте в приложение минимум два дополнительных фильтра и пресеты - фото, к которым применён наборы фильтров. При выборе миниатюры пресета такие же фильтры применяются к основному фото - ', 10);
+            console.log('Третий этап. Дополнительный фукционал на выбор - ', 40);
+            console.log(' - Перелистывание фото - ', 10);
+            console.log(' - загрузка в приложение фото с компьютера - ', 10);
+            console.log(' - сохранение фото на компьютер вместе с наложенными фильтрами - ', 10);
+            console.log(' - сброс фильтров кликом на кнопку - ', 10);
+            console.log('Общий балл - ', 30, '/', 30);
         }
     }
 
